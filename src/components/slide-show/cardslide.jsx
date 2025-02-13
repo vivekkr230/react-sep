@@ -6,6 +6,10 @@ export function CardSlideShow()
     const [product,setProduct] = useState({})
 
     let productId = useRef(1)
+
+    function loadProduct(){
+        
+    }
     return(
         <div className="container-fluid d-flex justify-content-center card w-50">
             <div className="card-header text-center">
