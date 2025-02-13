@@ -1,118 +1,129 @@
+import { useState, useEffect } from 'react'
 
-import {useState,useEffect} from 'react'
+export function FakeStoreWithFilter() {
 
-export function FakeStoreWithFilter(){
+    const [categories, setCategories] = useState([])
+    const [products, setProducts] = useState([{ id: '', title: '', price: 0, description: '', image: '', rating: { rate: 0, count: 0 } }])
+    const [counts, setCount] = useState(0)
+    const [showProduct, setShowProduct] = useState([])
+    function loadCategories() {
 
-    const [categories,setCategories]=useState([])
-    const [products,setProducts]=useState([{"id":0,"title":'',"price":0,"category":'',"image":'',"rating":{"rate":0,"count":0}}])
-    const [countProduct,setCountProduct]=useState(0)
-    const [cartItem,setCartItem]=useState([{"id":0,"title":'',"price":0}])
-    function loadCategories(){
         fetch('https://fakestoreapi.com/products/categories')
-        .then(res=>res.json())
-        .then(categorie=>{
-            categorie.unshift("all")
-            setCategories(categorie)
-        })
+            .then(res => res.json())
+            .then((opt) => {
+                // alert("goin to add all category")
+
+                setCategories(opt)
+            })
     }
 
-    function loadProducts(url){
-        fetch(url)
-        .then(res=>res.json())
-        .then(product=>{
-            setProducts(product)
-        })
-    }
-
-    useEffect(()=>{
-        loadCategories()
-        loadProducts('https://fakestoreapi.com/products')
-    },[])
-
-    function handleCategoryChange(e){
-        if(e.target.value=="all"){
-            loadProducts(`https://fakestoreapi.com/products`)
-
-        }
-        else{
+    function handleCategoryChange(e) {
+        alert(`you just clicked ${e.target.value}`)
+        if (e.target.value != "all") {
             loadProducts(`https://fakestoreapi.com/products/category/${e.target.value}`)
-
+        }
+        else {
+            loadProducts(`https://fakestoreapi.com/products`)
         }
     }
-    function handleCartItems(e){
-        alert(`${e.target.value}`)
-        cartItem.push(e.target.value)
-        setCountProduct(cartItem.length)
+
+    function loadProducts(url) {
+        fetch(url)
+            .then(res => res.json())
+            .then((item) => {
+                setProducts(item)
+            })
     }
-    return(
-        <div className="container container-fluid">
-            <header className="d-flex justify-content-between m-2  bg-light">
+
+    function handleProductDisplay(e) {
+        // alert(`you just clicked ${e.target.value}`)
+        fetch(`https://fakestoreapi.com/products/${e.target.value}`)
+            .then(res => res.json())
+            .then((prod) => {
+                setShowProduct(prod)
+                setCount(showProduct.length)
+            })
+    }
+
+    useEffect(() => {
+        loadCategories()
+        loadProducts()
+    }, [])
+
+    return (
+        <div className="container-fluid">
+            <header className="d-flex justify-content-between mt-2">
                 <div>
-                    <h2>Shopper.</h2>
+                    <p className="h2">Shopper.</p>
                 </div>
                 <div>
-                    <span className="me-2 ">Home</span>
-                    <span className="me-2 ">Kid's</span>
-                    <span className="me-2 ">Men's</span>
-                    <span className="me-2 ">Women's</span>
+                    <span className="me-2">Home</span>
+                    <span className="me-2">Men's</span>
+                    <span className="me-2">Women's</span>
+                    <span className="me-2">Kid's</span>
                 </div>
                 <div>
-                    <button className="btn btn-danger">
-                        <span>Add to Cart</span>
-                        <span className="bi bi-cart-3"></span>
-                        <span>{countProduct}</span>
+                    <button className="btn btn-danger rounded rounded-3">
+                        <span className='bi bi-cart-3'></span>cart
+                        <span>{counts}</span>
                     </button>
                 </div>
             </header>
-            <section className="row mt-4" onChange={handleCategoryChange}>
+            <section className="row mt-4">
                 <nav className="col-2">
-                    <label><b>Select Categories</b></label>
-                    <select name="" id="" className="form-select mt-1">
-                        
+                    <label htmlFor="" className=""><b>Select Catrgories</b></label>
+                    <select name="" id="" className="form-select mt-3" onChange={handleCategoryChange}>
                         {
-                            categories.map(categorie=>
-                                <option key={categorie} value={categorie}>{categorie.toUpperCase()}</option>)
+                            categories.map(category =>
+                                <option key={category} value={category}>{category.toUpperCase()}</option>)
                         }
                     </select>
                 </nav>
-                <main className="col-8 ">
-                    <div className="d-flex flex-wrap overflow-auto" style={{height:'500px'}}>
-                        {
-                            products.map(product=>
-                                <div className="card m-2" style={{height:"400px",width:'250px'}}>
-                                    <img src={product.image} className="card-img-top" height="200" width="140"></img>
-                                    <div className="card-header overflow-auto" style={{height:"100px"}}>
-                                        <p className="card-title">{product.title}</p>
-                                    </div>
-                                    <div className="card-body" style={{height:"100px"}}>
-                                        <dl>
-                                            <dt>price</dt>
-                                            <dd>{(product.price).toLocaleString('en-IN',{style:'currency',currency:'INR'})}</dd>
-                                        </dl>
-                                    </div> 
-                                    <div className="card-footer" style={{height:"100px"}}>
-                                        <button value={product.id} className="w-100 btn btn-danger" onClick={handleCartItems}>
-                                            Add to cart
-                                        </button>
-                                    </div>  
-                                </div>
-                                )
-                        }
+                <main className="col-8">
+                    <div className="d-flex overflow-auto" style={{ height: '600' }}>
+                        <div className="d-flex flex-wrap">
+                            {
+                                products.map(product =>
+                                    <div className="card m-2" style={{ width: "270px", height: "400px" }}>
+                                        <img className="card-img-top" src={product.image} alt="" width="140" height="140" />
+                                        <div className="card-header overflow-auto">
+                                            <p className="card-title">{product.description}</p>
+                                        </div>
+                                        <div className="card-body">
+                                            <span>{product.rating.rate}</span> Rates<br></br>
+                                            <span>{product.rating.count}</span> Reviews
+                                        </div>
+                                        <div className="card-footer">
+                                            <p>&#8377;{product.price}</p>
+                                            <button value={product.id} onClick={handleProductDisplay} className="btn btn-primary w-100">Add to cart</button>
+                                        </div>
+                                    </div>)
+                            }
+                        </div>
                     </div>
+
                 </main>
                 <aside className="col-2">
-                        <table className="table table-hover">
-                            <caption className="caption-top"></caption>
-                            <thead>
-                                <tr>
-                                    <th>title</th>
-                                    <th>Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                
-                            </tbody>
-                        </table>
+                    <table className="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Preview</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                showProduct.map(item =>
+                                    <tr>
+                                        <td key={item.id}>{item.id}</td>
+                                        <td><img src={item.image} height="50" width="50" alt="" /></td>
+                                    </tr>
+                                    )
+
+                            }
+                        </tbody>
+                    </table>
+
                 </aside>
             </section>
         </div>
